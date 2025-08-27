@@ -1,49 +1,41 @@
-import { OpenAI } from "openai";
+// Core LLM functions for churn reason clustering and action plan generation
 
-// You can easily swap this with Gemini, Claude, etc.
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
+/**
+ * Simulate clustering churn reasons from feedback.
+ * Replace with real LLM API integration in production.
+ */
 export async function clusterChurnReasons(feedbackText: string): Promise<string[]> {
-  // Use OpenAI to extract and cluster churn reasons
-  const prompt = `
-    Analyze the following customer feedback and identify the main reasons for churn. 
-    Return a concise JSON array of churn reason strings, sorted by frequency and importance.
-
-    FEEDBACK:
-    ${feedbackText}
-  `;
-  const resp = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [{ role: "user", content: prompt }],
-    max_tokens: 512,
-  });
-  // Try to parse a JSON array response
-  try {
-    const jsonStart = resp.choices[0]?.message?.content?.indexOf("[");
-    const jsonEnd = resp.choices[0]?.message?.content?.lastIndexOf("]");
-    if (jsonStart !== undefined && jsonEnd !== undefined && jsonStart >= 0 && jsonEnd > jsonStart) {
-      const arr = JSON.parse(resp.choices[0].message.content.slice(jsonStart, jsonEnd + 1));
-      return Array.isArray(arr) ? arr : [];
-    }
-    return resp.choices[0].message.content
-      .split("\n")
-      .filter((x) => x.trim().length > 0);
-  } catch {
-    return ["Unable to cluster reasons, please check your input."]; 
-  }
+  // Fake clustering for demo
+  const lower = feedbackText.toLowerCase();
+  const reasons: string[] = [];
+  if (lower.includes('price')) reasons.push('Pricing concerns');
+  if (lower.includes('support')) reasons.push('Customer support issues');
+  if (lower.includes('features')) reasons.push('Missing features');
+  if (lower.includes('competition')) reasons.push('Competitor offering');
+  if (reasons.length === 0) reasons.push('Other (see feedback)');
+  return reasons;
 }
 
+/**
+ * Simulate generating a retention action plan from churn reasons.
+ * Replace with real LLM API integration in production.
+ */
 export async function generateActionPlan(churnReasons: string[]): Promise<string> {
-  // Use OpenAI to generate actionable retention plan based on churn reasons
-  const planPrompt = `
-    Given these top churn reasons: ${churnReasons.join(", ")}, provide a structured, actionable plan to reduce churn, formatted in Markdown. Make it clear and actionable.
-  `;
-  const resp = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [{ role: "user", content: planPrompt }],
-    max_tokens: 600,
-  });
-  return resp.choices[0]?.message?.content || "No action plan generated.";
+  // Fake action plan for demo
+  let plan = '<ul>';
+  for (const reason of churnReasons) {
+    if (reason === 'Pricing concerns') {
+      plan += '<li>Review pricing strategy and offer targeted discounts.</li>';
+    } else if (reason === 'Customer support issues') {
+      plan += '<li>Improve support response time and train agents.</li>';
+    } else if (reason === 'Missing features') {
+      plan += '<li>Prioritize feature requests in roadmap.</li>';
+    } else if (reason === 'Competitor offering') {
+      plan += '<li>Highlight unique value propositions and customer success stories.</li>';
+    } else {
+      plan += '<li>Investigate feedback and reach out to customers for more details.</li>';
+    }
+  }
+  plan += '</ul>';
+  return plan;
 }
