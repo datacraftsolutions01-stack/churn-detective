@@ -1,22 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { clusterChurnReasons, generateActionPlan } from "@/lib/llm";
+import { clusterChurnReasons, generateActionPlan } from '../../../lib/llm';
 
-export async function POST(req: NextRequest) {
-  const { feedbackText } = await req.json();
-
-  if (!feedbackText || typeof feedbackText !== "string") {
-    return NextResponse.json({ error: "Invalid feedbackText." }, { status: 400 });
-  }
-
-  try {
-    const churnReasons = await clusterChurnReasons(feedbackText);
-    const actionPlan = await generateActionPlan(churnReasons);
-
-    return NextResponse.json({
-      churnReasons,
-      actionPlan,
-    });
-  } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
-  }
+export async function POST(request: Request) {
+  const { feedback } = await request.json();
+  const reasons = await clusterChurnReasons(feedback);
+  const plan = await generateActionPlan(reasons);
+  return new Response(JSON.stringify({ reasons, plan }), {
+    headers: { 'Content-Type': 'application/json' }
+  });
 }
